@@ -20,27 +20,31 @@ const func = json => {
 }
 
 const fetchService = new Fetch(
-	"http://example.com",
+	"https://example.com",
 	{
-		param: "auth_token", // auth token parameter got in response from server
-		key: "auth_token" // Storage key
+		// params: the params the server expects / returns.
+		auth_token: "auth_token", // auth token param in server response
+		refresh_token: "refresh_token", // POST param for refreshing token
+		error: "message" // if an error occurs, what's the name of the param the server returns? {"message": "ERROR MESSAGE"}
 	},
 	{
-		param: "refresh_token", // refresh token parameter to send in request to server
-		key: "refresh_token" // Storage key
+		// keys in async storage
+		auth_token: "auth_token",
+		refresh_token: "refresh_token"
 	},
 	{
 		EXPIRED_TOKEN: "_handleExpiredToken", // built in in class
-		ANOTHER_THING: func
+		INVALID_TOKEN: func
 	},
-	2
+	2, // maximum requests to be sent
+	"login/refresh_token" // refresh token endpoint
 )
-const resp = await fetchService.fetch("/some_endpoint", {
-	method: "POST",
-	body: JSON.stringify({
-		exchange_token: token
-	})
-})
 
+const resp = await fetchService.fetch("/endpoint", {
+	method: "POST",
+	body: {
+		param: "hello world"
+	}
+})
 // resp.json and resp.status
 ```

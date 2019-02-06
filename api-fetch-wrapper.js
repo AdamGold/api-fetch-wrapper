@@ -6,10 +6,10 @@ module.exports = class FetchWrapper {
 	constructor(
 		rootUrl,
 		params,
-		storage,
-		customExceptions,
-		requestsLimit,
-		refreshEndPoint
+		storage = {},
+		customExceptions = {},
+		requestsLimit = 2,
+		refreshEndPoint = ""
 	) {
 		this.sentRequests = 0
 		this._requestsLimit = requestsLimit
@@ -51,6 +51,7 @@ module.exports = class FetchWrapper {
     and re-send the original request.
     */
 	async _handleExpiredToken(json) {
+		if (!this._storage || !this._refreshEndPoint) return {}
 		const refresh_token = await AsyncStorage.getItem(
 			this._storage["refresh_token"]
 		)
@@ -68,7 +69,7 @@ module.exports = class FetchWrapper {
 		const respJSON = await resp.json()
 		console.log(respJSON)
 		this._throwError(resp.status, respJSON)
-		await Storage.setItem(
+		await AsyncStorage.setItem(
 			this._storage["auth_token"],
 			respJSON[this._params["auth_token"]]
 		)

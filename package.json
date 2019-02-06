@@ -1,0 +1,15 @@
+{
+	"name": "api-fetch-wrapper",
+	"version": "1.0.0",
+	"description": "Custom class to handle api requests and responses.",
+	"main": "api-fetch-wrapper.js",
+	"scripts": {
+		"test": "jest"
+	},
+	"keywords": [
+		"api",
+		"fetch"
+	],
+	"author": "adamgold7@gmail.com",
+	"license": "ISC"
+}

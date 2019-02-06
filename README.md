@@ -1,6 +1,6 @@
 # api-fetch-wrapper
 
-This is a small wrapper to handle custom responses from your server.
+This is a small wrapper to handle custom responses from your server. The package automatically adds an auth header to all your requests - it fetches the auth token from Async Storage (It's not secure. I recommend using [rn-secure-storage](https://github.com/talut/rn-secure-storage)). If the token is expired, it can send a refrsh request and then re-send the original request. You can also define your own functions based on the server's response.
 
 ### Example scenario
 
@@ -34,17 +34,24 @@ const fetchService = new Fetch(
 	},
 	{
 		EXPIRED_TOKEN: "_handleExpiredToken", // built in in class
-		INVALID_TOKEN: func
+		INVALID_TOKEN: func // in case I get {message: "INVALID_TOKEN"}, call func
 	},
 	2, // maximum requests to be sent
 	"login/refresh_token" // refresh token endpoint
 )
 
-const resp = await fetchService.fetch("/endpoint", {
-	method: "POST",
-	body: {
-		param: "hello world"
-	}
-})
+try {
+	const resp = await fetchService.fetch("/endpoint", {
+		method: "POST",
+		body: {
+			param: "hello world"
+		}
+	})
+
+	// resp.json and resp.status
+} catch (error) {
+	// error.message is either an error from your server (if you defined params.error)
+	// or a default error
+}
 // resp.json and resp.status
 ```

@@ -25,11 +25,16 @@ const fetchService = new Fetch(
 	"login/refresh_token" // refresh token endpoint
 )
 
-const resp = await fetchService.fetch("/endpoint", {
-	method: "POST",
-	body: {
-		param: "hello world"
-	}
-})
+try {
+	const resp = await fetchService.fetch("/endpoint", {
+		method: "POST",
+		body: {
+			param: "hello world"
+		}
+	})
 
-// resp.json and resp.status
+	// resp.json and resp.status
+} catch (error) {
+	// error.message is either an error from your server (if you defined params.error)
+	// or a default error
+}

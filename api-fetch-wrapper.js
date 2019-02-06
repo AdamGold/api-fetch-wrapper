@@ -31,6 +31,7 @@ module.exports = class FetchWrapper {
     */
 	async _handleExceptions(json) {
 		if (
+			this._params.hasOwnProperty("error") &&
 			this._definedExceptions.hasOwnProperty(json[this._params["error"]])
 		) {
 			const func = this._definedExceptions[json[this._params["error"]]]

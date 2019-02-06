@@ -1,6 +1,6 @@
 {
 	"name": "api-fetch-wrapper",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Custom class to handle api requests and responses.",
 	"main": "api-fetch-wrapper.js",
 	"scripts": {

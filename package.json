@@ -18,5 +18,6 @@
 		"jest": "^21.2.1"
 	},
 	"author": "adamgold7@gmail.com",
-	"license": "ISC"
+	"license": "ISC",
+	"homepage": "https://github.com/AdamGold/api-fetch-wrapper"
 }

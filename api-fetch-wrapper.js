@@ -79,9 +79,12 @@ module.exports = class FetchWrapper {
 	_throwError(status, json) {
 		if (400 <= status && status < 600) {
 			// we have an error
-			let msg = json
-			if (msg.hasOwnProperty(this._params["error"]))
-				msg = msg[this._params["error"]]
+			let msg = "Something went wrong."
+			if (
+				this._params.hasOwnProperty("error") &&
+				json.hasOwnProperty(this._params["error"])
+			)
+				msg = json[this._params["error"]]
 			throw new Error(msg)
 		}
 	}

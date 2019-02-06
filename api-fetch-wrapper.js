@@ -5,10 +5,11 @@ module.exports = class FetchWrapper {
 
 	constructor(
 		rootUrl,
-		authToken,
-		refreshToken,
+		params,
+		storage,
+		customExceptions,
 		requestsLimit,
-		customExceptions
+		refreshEndPoint
 	) {
 		this.sentRequests = 0
 		this._requestsLimit = requestsLimit
@@ -17,8 +18,9 @@ module.exports = class FetchWrapper {
 			"Content-Type": "application/json"
 		}
 		this._definedExceptions = customExceptions
-		this._refresh = refreshToken
-		this._auth = authToken
+		this._params = params
+		this._storage = storage
+		this._refreshEndPoint = refreshEndPoint
 		this.rootURL = rootUrl
 	}
 
@@ -29,16 +31,16 @@ module.exports = class FetchWrapper {
     */
 	async _handleExceptions(json) {
 		if (
-			this._definedExceptions.hasOwnProperty(
-				json[this._response["error"]]
-			)
+			this._definedExceptions.hasOwnProperty(json[this._params["error"]])
 		) {
-			const func = this._definedExceptions[json[this._response["error"]]]
-			let handling = func
-			if (typeof func == "String") {
-				handling = this[func]
+			const func = this._definedExceptions[json[this._params["error"]]]
+			let handling
+			if (typeof func === "string") {
+				handling = await this[func](json)
+			} else {
+				handling = await func(json)
 			}
-			return await handling(json)
+			return handling
 		}
 		return json
 	}
@@ -48,22 +50,28 @@ module.exports = class FetchWrapper {
     Send request to refresh the token,
     and re-send the original request.
     */
-	async _handleExpiredToken() {
-		const refresh_token = await AsyncStorage.getItem(this._refresh["key"])
+	async _handleExpiredToken(json) {
+		const refresh_token = await AsyncStorage.getItem(
+			this._storage["refresh_token"]
+		)
 		if (!refresh_token) {
 			// don't have a refresh token, will have to login again
 			return {}
 		}
-		const resp = await fetch(this.rootURL + this._refresh["endpoint"], {
+		const resp = await fetch(this.rootURL + this._refreshEndPoint, {
 			method: "POST",
 			headers: this.defaultHeaders,
 			body: JSON.stringify({
-				[this._refresh["param"]]: refresh_token
+				[this._params["refresh_token"]]: refresh_token
 			})
 		})
 		const respJSON = await resp.json()
+		console.log(respJSON)
 		this._throwError(resp.status, respJSON)
-		await Storage.setItem(this._auth["key"], respJSON[this._auth["param"]])
+		await Storage.setItem(
+			this._storage["auth_token"],
+			respJSON[this._params["auth_token"]]
+		)
 		return { symbol: this._RESEND }
 	}
 
@@ -71,8 +79,8 @@ module.exports = class FetchWrapper {
 		if (400 <= status && status < 600) {
 			// we have an error
 			let msg = json
-			if (msg.hasOwnProperty(this._response["error"]))
-				msg = msg[this._response["error"]]
+			if (msg.hasOwnProperty(this._params["error"]))
+				msg = msg[this._params["error"]]
 			throw new Error(msg)
 		}
 	}
@@ -83,7 +91,7 @@ module.exports = class FetchWrapper {
 			this.sentRequests = 0
 			throw new Error("Too many requests.")
 		}
-		const token = await AsyncStorage.getItem(this.authToken["key"])
+		const token = await AsyncStorage.getItem(this._storage["auth_token"])
 		fetchParams[1]["headers"] = {
 			...this.defaultHeaders,
 			...fetchParams[1]["headers"],

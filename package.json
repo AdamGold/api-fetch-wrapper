@@ -10,6 +10,13 @@
 		"api",
 		"fetch"
 	],
+	"peerDependencies": {
+		"react": "^16.0.0-alpha.12",
+		"react-native": "^0.44.0"
+	},
+	"devDependencies": {
+		"jest": "^21.2.1"
+	},
 	"author": "adamgold7@gmail.com",
 	"license": "ISC"
 }

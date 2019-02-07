@@ -1,6 +1,6 @@
 # api-fetch-wrapper
 
-This is a small wrapper to handle custom responses from your server. The package automatically adds an auth header to all your requests - it fetches the auth token from Async Storage (It's not secure. I recommend using [rn-secure-storage](https://github.com/talut/rn-secure-storage)). If the token is expired, it can send a refrsh request and then re-send the original request. You can also define your own functions based on the server's response.
+This is a small wrapper to handle custom responses from your server. The package automatically adds an auth header to all your requests - it fetches the auth token using a function it receives as a parameter (I recommend using [rn-secure-storage](https://github.com/talut/rn-secure-storage)). If the token is expired, it can send a refresh request and then re-send the original request. You can also define your own functions based on the server's response.
 
 ### Example scenario
 

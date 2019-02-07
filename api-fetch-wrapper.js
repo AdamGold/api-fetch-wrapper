@@ -1,12 +1,10 @@
-import { AsyncStorage } from "react-native"
-
 module.exports = class FetchWrapper {
 	_RESEND = Symbol("RESEND")
 
 	constructor(
 		rootUrl,
 		params,
-		storage = {},
+		tokensFunction,
 		customExceptions = {},
 		requestsLimit = 2,
 		refreshEndPoint = ""
@@ -19,7 +17,7 @@ module.exports = class FetchWrapper {
 		}
 		this._definedExceptions = customExceptions
 		this._params = params
-		this._storage = storage
+		this._tokensFunction = tokensFunction
 		this._refreshEndPoint = refreshEndPoint
 		this.rootURL = rootUrl
 	}
@@ -52,11 +50,11 @@ module.exports = class FetchWrapper {
     and re-send the original request.
     */
 	async _handleExpiredToken(json) {
-		if (!this._storage || !this._refreshEndPoint) return {}
-		const refresh_token = await AsyncStorage.getItem(
-			this._storage["refresh_token"]
+		if (!this._refreshEndPoint) return {}
+		const refreshToken = await this._tokensFunction(
+			this._params["refresh_token"]
 		)
-		if (!refresh_token) {
+		if (!refreshToken) {
 			// don't have a refresh token, will have to login again
 			return {}
 		}
@@ -64,14 +62,13 @@ module.exports = class FetchWrapper {
 			method: "POST",
 			headers: this.defaultHeaders,
 			body: JSON.stringify({
-				[this._params["refresh_token"]]: refresh_token
+				[this._params["refresh_token"]]: refreshToken
 			})
 		})
 		const respJSON = await resp.json()
-		console.log(respJSON)
 		this._throwError(resp.status, respJSON)
-		await AsyncStorage.setItem(
-			this._storage["auth_token"],
+		await this._tokensFunction(
+			this._params["auth_token"],
 			respJSON[this._params["auth_token"]]
 		)
 		return { symbol: this._RESEND }
@@ -96,7 +93,7 @@ module.exports = class FetchWrapper {
 			this.sentRequests = 0
 			throw new Error("Too many requests.")
 		}
-		const token = await AsyncStorage.getItem(this._storage["auth_token"])
+		const token = this._tokensFunction(this._params["auth_token"])
 		fetchParams[1]["headers"] = {
 			...this.defaultHeaders,
 			...fetchParams[1]["headers"],

@@ -10,27 +10,21 @@ Every time you get `EXPIRED_TOKEN`, you want to send a `refresh_token` request, 
 
 `npm install api-fetch-wrapper`
 
-## Usage
+## Setup
 
 ```js
 import Fetch from "api-fetch-wrapper"
 
-const handleInvalidToken = json => {
-	// do something
-}
-
 const storeFunction = async (key, value = "") => {
 	/* the library sends the keys you define in params */
 	if (value == "") {
-		// get value
 		return await AsyncStorage.getItem(value)
 	}
-	// set value
 	return await AsyncStorage.setItem(key, value)
 }
 
 const fetchService = new Fetch(
-	"https://example.com",
+	"https://example.com", // base URL
 	{
 		// params: the params the server expects / returns, and the keys to send to storeFunction
 		auth_token: "auth_token", // auth token param in server response
@@ -40,12 +34,14 @@ const fetchService = new Fetch(
 	storeFunction, // function to handle get / set tokens
 	{
 		EXPIRED_TOKEN: "_handleExpiredToken", // built in in class
-		INVALID_TOKEN: handleInvalidToken
 	},
 	2, // maximum requests to be sent
 	"login/refresh_token" // refresh token endpoint
 )
+```
 
+## Usage
+```js
 try {
 	const resp = await fetchService.fetch("/endpoint", {
 		method: "POST",
